@@ -187,7 +187,7 @@ def peer_processing(node):
 			lock.release()
 		else:
 			connected_nodes.remove(node)
-			peers_set.erase(node['IP'])
+			peers_set.remove(node['IP'])
 			peers_list.remove(node['IP'])
 			peers_ip_list.remove(node['IP'])
 
