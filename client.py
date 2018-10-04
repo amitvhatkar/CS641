@@ -235,6 +235,8 @@ def create_socket(port):
 			'socket' : conn
 		}
 		connected_nodes.append(node)
+		peers_list[node]['socket'] = conn
+		peers_list[node]['Connected'] = True
 		_thread.start_new_thread(peer_processing,(node,))
 
 
@@ -272,7 +274,7 @@ def main():
 	global seeds,peers_list, sha_msg
 
 	_thread.start_new_thread(create_socket,(sys.argv[1],))#create_socket(sys.argv[1])
-	#_thread.start_new_thread(broadcast_message,())
+	_thread.start_new_thread(broadcast_message,())
 	#_thread.start_new_thread(receive_broadcasted_msg,())
 
 	while True:
