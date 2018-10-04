@@ -20,13 +20,14 @@ PEER_PORT = 20000
 N = 10
 seed_threshold = 3
 peers_list = []
+peers_ip_list = []
 
 file_name = "coin_info_at_"+HOST+"_"+str(PORT)+".txt"
 node_file = open(file_name,"w+")
 
-connected_nodes_set = set()
+peers_set = set()
 
-#sys.stdout = open('client_out_'+file_name, 'w')
+sys.stdout = open('client_out_'+file_name, 'w')
 
 no_of_seeds_connectd = 0
 connected_nodes = []
@@ -38,14 +39,14 @@ lock = _thread.allocate_lock()
 seeds = [
 	
 	{
-		'IP': '192.168.1.100',
+		'IP': '10.196.27.113',
 		'PORT' : 15000,
 		'IsSeed' : True,
 		'Connected' : False	
 	},
 	{
 		'IP': '10.130.155.41',
-		'PORT' : 15002,
+		'PORT' : 15000,
 		'IsSeed' : True,
 		'Connected' : False
 	},
@@ -108,8 +109,8 @@ def connectToNodes(node_list, is_to_seed = False):
 
 
 def learnAboutPeers():
-	global no_of_seeds_connectd, connected_nodes, peers_list
-	peers_set = set()
+	global no_of_seeds_connectd, connected_nodes, peers_list, peers_set
+	#peers_set = set()
 	for node in connected_nodes:
 		if node['IsSeed'] :
 			node['socket'].send(b"REQUEST_PEER")
@@ -128,23 +129,29 @@ def learnAboutPeers():
 	i = 0;
 
 	for peer in peers_set:
-		print(peer, "*******")
+		
 		node = {
-			'IP': peer.split(":")[0],
+			'IP': peer,
 			'PORT' : PEER_PORT,
 			'IsSeed' : False,
 			'Connected' : False			
 		}
-		i = i + 1
+		print(peer, "*******", node not in peers_list)
+		if peer not in peers_ip_list:
+			print("Set of peers: ", peers_set, peers_list)
+			#node['Connected'] = False
+			peers_list.append(node)
+			peers_ip_list.append(peer)
+		#i = i + 1
 		#print("Node added : ", node)
 
 		'''
 		BUG here
 		'''
 
-		peers_list.append(node)
+		
 
-	print(peers_list)
+	#print(peers_list)
 		
 
 def peer_processing(node):
@@ -154,10 +161,10 @@ def peer_processing(node):
 	conn = node['socket']
 	addr = (node['IP'], node['PORT'])
 	while True:
-		print("waiting to receive !!!!")
+		#print("waiting to receive !!!!")
 		data = conn.recv(1024)
 		if data:
-			print("broad casted Info received", addr)
+			#print("broad casted Info received", addr)
 
 			lock.acquire()
 
@@ -180,6 +187,10 @@ def peer_processing(node):
 			lock.release()
 		else:
 			connected_nodes.remove(node)
+			peers_set.erase(node['IP'])
+			peers_list.remove(node['IP'])
+			peers_ip_list.remove(node['IP'])
+
 			print(addr[0], ":", addr[1], "Existed System!!!")
 			_thread.exit()
 			break;
@@ -266,7 +277,7 @@ def main():
 		#print(connected_nodes)
 		
 
-		print("Printing sha msg\n",sha_msg, "End\n")
+		print("Printing sha msg\n",len(sha_msg), "End\n")
 
 		#node_file.write("\n\n\n\n\n")
 		#node_file.flush()
