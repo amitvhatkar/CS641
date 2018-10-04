@@ -188,7 +188,7 @@ def peer_processing(node):
 		else:
 			connected_nodes.remove(node)
 			peers_set.remove(node['IP'])
-			peers_list.remove(node['IP'])
+			peers_list.remove(node)
 			peers_ip_list.remove(node['IP'])
 
 			print(addr[0], ":", addr[1], "Existed System!!!")
