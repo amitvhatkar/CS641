@@ -115,15 +115,20 @@ def learnAboutPeers():
 		if node['IsSeed'] :
 			node['socket'].send(b"REQUEST_PEER")
 			data = node['socket'].recv(1024)
-			data = data.decode("utf-8")
-			dataLen = int(data.split("#")[0])
-			data = data.split("#")[1]
-			#print(dataLen, len(data))
-			while(len(data) < dataLen):
-				data = data + node['socket'].recv(1024)
 
-			print(set(data.split("-")))
-			peers_set = peers_set | set(data.split("-"))
+			if data:
+				data = data.decode("utf-8")
+				dataLen = int(data.split("#")[0])
+				data = data.split("#")[1]
+				#print(dataLen, len(data))
+				while(len(data) < dataLen):
+					data = data + node['socket'].recv(1024)
+
+				print(set(data.split("-")))
+				peers_set = peers_set | set(data.split("-"))
+			else:
+				node['Connected'] = False
+				print("Seed", node['IP'],"disconnected !!!")
 			
 	#print(peers_set, "Received from server !!")
 	i = 0;
@@ -236,8 +241,11 @@ def create_socket(port):
 def broadcast_message():
 	global sha_msg
 	while True:
-		random_no = random.randint(0,len(peers_list) - 1)
 
+		try:
+			random_no = random.randint(0,len(peers_list) - 1)
+		except:
+			continue
 		print("Generated random no : ", random_no, " length of peers: ", len(peers_list))
 
 		lock.acquire()
@@ -273,7 +281,7 @@ def main():
 		learnAboutPeers()
 		print("Checking for peers", len(peers_list))
 		connectToNodes(peers_list, is_to_seed = False) #peers
-		_thread.start_new_thread(broadcast_message,())
+		#_thread.start_new_thread(broadcast_message,())
 		#print(connected_nodes)
 		
 
