@@ -230,14 +230,19 @@ def create_socket(port):
 			'socket' : conn
 		}
 		connected_nodes.append(node)
+		peers_list[node]['socket'] = conn
+		peers_list[node]['Connected'] = True
 		_thread.start_new_thread(peer_processing,(node,))
 
 
 def broadcast_message():
 	global sha_msg
 	while True:
-		random_no = random.randint(0,len(peers_list) - 1)
 
+		try:
+			random_no = random.randint(0,len(peers_list) - 1)
+		except:
+			continue
 		print("Generated random no : ", random_no, " length of peers: ", len(peers_list))
 
 		lock.acquire()
@@ -264,7 +269,7 @@ def main():
 	global seeds,peers_list, sha_msg
 
 	_thread.start_new_thread(create_socket,(sys.argv[1],))#create_socket(sys.argv[1])
-	#_thread.start_new_thread(broadcast_message,())
+	_thread.start_new_thread(broadcast_message,())
 	#_thread.start_new_thread(receive_broadcasted_msg,())
 
 	while True:
@@ -273,7 +278,7 @@ def main():
 		learnAboutPeers()
 		print("Checking for peers", len(peers_list))
 		connectToNodes(peers_list, is_to_seed = False) #peers
-		_thread.start_new_thread(broadcast_message,())
+		#_thread.start_new_thread(broadcast_message,())
 		#print(connected_nodes)
 		
 
