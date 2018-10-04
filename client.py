@@ -111,10 +111,17 @@ def connectToNodes(node_list, is_to_seed = False):
 def learnAboutPeers():
 	global no_of_seeds_connectd, connected_nodes, peers_list, peers_set
 	#peers_set = set()
+	print("Connected nodes length: ", connected_nodes)
 	for node in connected_nodes:
-		if node['IsSeed'] :
+		if node['IsSeed'] and node['Connected']:
 			node['socket'].send(b"REQUEST_PEER")
-			data = node['socket'].recv(1024)
+			try:
+				data = node['socket'].recv(1024)
+			except:
+				#node['Connected'] = False
+				connected_nodes.remove(node)
+				print("Connection Reset by seed!!!")
+				continue
 
 			if data:
 				data = data.decode("utf-8")
@@ -127,10 +134,11 @@ def learnAboutPeers():
 				print(set(data.split("-")))
 				peers_set = peers_set | set(data.split("-"))
 			else:
-				node['Connected'] = False
+				#node['Connected'] = False
+				connected_nodes.remove(node)
 				print("Seed", node['IP'],"disconnected !!!")
 			
-	#print(peers_set, "Received from server !!")
+	print("Connected nodes length at end: ", connected_nodes)
 	i = 0;
 
 	for peer in peers_set:
@@ -235,8 +243,8 @@ def create_socket(port):
 			'socket' : conn
 		}
 		connected_nodes.append(node)
-		peers_list[node]['socket'] = conn
-		peers_list[node]['Connected'] = True
+		#peers_list[node]['socket'] = conn
+		#peers_list[node]['Connected'] = True
 		_thread.start_new_thread(peer_processing,(node,))
 
 
